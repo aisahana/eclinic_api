@@ -5,6 +5,9 @@
 Ini adalah API untuk eClinic. eClinic adalah aplikasi sistem informasi
 rawat jalan sumber terbuka untuk klinik.
 
+### Admin Panel
+Karena aplikasi ini membutuhkan Admin, Admin eClinic bisa Anda dapatkan [disini](https://github.com/aisahana/eclinic_admin).
+
 ### Quick Setup
 Clone repo ini lalu jalankan perintah:
 
