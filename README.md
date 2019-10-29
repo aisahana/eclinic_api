@@ -29,7 +29,7 @@ http://localhost:8000
 
 ## Demo
 Anda bisa melihat demonya 
-[disini](https://www.google.com).
+[disini](https://www.youtube.com/playlist?list=PLq10xSDEwzczYJ3luDICP2JbM9I7A0rmK).
 
 
 
