@@ -1,3 +1,5 @@
+![eClinic]( ./eClinic.png "eClinic")
+
 ## eClinic API
 
 Ini adalah API untuk eClinic. eClinic adalah aplikasi sistem informasi
@@ -24,4 +26,10 @@ API telah siap digunakan dengan mengakses:
 ```
 http://localhost:8000
 ```
+
+## Demo
+Anda bisa melihat demonya 
+[disini](https://www.google.com).
+
+
 
