@@ -12,6 +12,7 @@ from medicines.models import Recipe
 from orders.models import Register
 from users.models import Doctor, Patient
 from users.serializers import DoctorSerializer, PatientSerializer, VisitorSerializer
+from utils.views import pdf_template
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -66,47 +67,25 @@ class DoctorViewSet(viewsets.ModelViewSet):
             'poly__poly_number'
         )
 
-        data = {
-            'pageOrientation': 'landscape',
-            'watermark': {
-                'text': 'eClinic - Aisahana',
-                'color': 'blue',
-                'opacity': 0.3,
-                'bold': True,
-                'italics': False,
-                'fontSize': 60
-            },
-            'info': {
-                'title': 'Aisahana Reporting',
-                'author': 'Aisahana',
-                'subject': 'Laporan Dokter',
-            },
-            'content': [
-                {
-                    'text': 'LAPORAN DOKTER',
-                    'fontSize': 20,
-                    'margin': [0, 15]
-                },
-                {
-                    'layout': 'lightHorizontalLines',
-                    'table': {
-                        'body': [
-                            [
-                                'Nomer Dokter',
-                                'Nama',
-                                'Gender',
-                                'Telepon',
-                                'Tarif',
-                                'Kode Poli',
-                            ],
-                            *doctors
-                        ]
-                    }
-                }
-            ]
+        body = {
+            'table': {
+                'body': [
+                    [
+                        {'text': 'Nomer Dokter', 'style': 'tableHeader'},
+                        {'text': 'Nama', 'style': 'tableHeader'},
+                        {'text': 'Gender', 'style': 'tableHeader'},
+                        {'text': 'Telepon', 'style': 'tableHeader'},
+                        {'text': 'Tarif', 'style': 'tableHeader'},
+                        {'text': 'Kode Poli', 'style': 'tableHeader'},
+                    ],
+                    *doctors
+                ]
+            }
         }
 
-        return Response(data)
+        template = pdf_template([body], 'Laporan Dokter', orientation='landscape')
+
+        return Response(template)
 
 
 class PatientViewSet(viewsets.ModelViewSet):
@@ -163,49 +142,27 @@ class PatientViewSet(viewsets.ModelViewSet):
             'religion',
         )
 
-        data = {
-            'pageOrientation': 'landscape',
-            'watermark': {
-                'text': 'eClinic - Aisahana',
-                'color': 'blue',
-                'opacity': 0.3,
-                'bold': True,
-                'italics': False,
-                'fontSize': 60
-            },
-            'info': {
-                'title': 'Aisahana Reporting',
-                'author': 'Aisahana',
-                'subject': 'Laporan Dokter',
-            },
-            'content': [
-                {
-                    'text': 'LAPORAN PASIEN',
-                    'fontSize': 20,
-                    'margin': [0, 15]
-                },
-                {
-                    'layout': 'lightHorizontalLines',
-                    'table': {
-                        'body': [
-                            [
-                                'Nomer Pasien',
-                                'Nama',
-                                'Gender',
-                                'Tempat Lahir',
-                                'Tanggal Lahir',
-                                'Telepon',
-                                'Pekerjaan',
-                                'Agama',
-                            ],
-                            *patients
-                        ]
-                    }
-                }
-            ]
+        body = {
+            'table': {
+                'body': [
+                    [
+                        {'text': 'Nomer Pasien', 'style': 'tableHeader'},
+                        {'text': 'Nama', 'style': 'tableHeader'},
+                        {'text': 'Gender', 'style': 'tableHeader'},
+                        {'text': 'Tempat Lahir', 'style': 'tableHeader'},
+                        {'text': 'Tanggal Lahir', 'style': 'tableHeader'},
+                        {'text': 'Telepon', 'style': 'tableHeader'},
+                        {'text': 'Pekerjaan', 'style': 'tableHeader'},
+                        {'text': 'Agama', 'style': 'tableHeader'},
+                    ],
+                    *patients
+                ]
+            }
         }
 
-        return Response(data)
+        template = pdf_template([body], 'Laporan Pasien', orientation='landscape')
+
+        return Response(template)
 
     @action(detail=True, methods=['post'])
     def report_medical_record(self, request, pk=None):
@@ -221,7 +178,7 @@ class PatientViewSet(viewsets.ModelViewSet):
             act = recipe.action
 
             diagnosis.append({
-                'layout': 'lightHorizontalLines',
+                'layout': 'noBorders',
                 'table': {
                     'body': [
                         ['Tanggal', ':', date],
@@ -235,57 +192,38 @@ class PatientViewSet(viewsets.ModelViewSet):
             })
             diagnosis.append('\n\n')
 
-        data = {
-            'pageOrientation': 'landscape',
-            'watermark': {
-                'text': 'eClinic - Aisahana',
-                'color': 'blue',
-                'opacity': 0.3,
-                'bold': True,
-                'italics': False,
-                'fontSize': 60
-            },
-            'info': {
-                'title': 'Aisahana Reporting',
-                'author': 'Aisahana',
-                'subject': 'Laporan Dokter',
-            },
-            'content': [
-                {
-                    'text': 'REKAM MEDIS',
-                    'fontSize': 20,
-                    'margin': [0, 15]
-                },
-                {
-                    'columns': [
-                        {
-                            'layout': 'noBorders',
-                            'table': {
-                                'body': [
-                                    ['Nomer Pasien', ':', patient.patient_number],
-                                    ['Nama', ':', patient.name],
-                                    ['Alamat', ':', patient.address],
-                                    ['Gender', ':', patient.gender],
-                                    ['Tempat dan Tanggal Lahir', ':', f'{patient.place_birth}, {patient.date_birth}'],
-                                ]
-                            }
-                        },
-                        {
-                            'layout': 'noBorders',
-                            'table': {
-                                'body': [
-                                    ['Telepon', ':', patient.phone],
-                                    ['Golongan Darah', ':', patient.blood],
-                                    ['Pekerjaan', ':', patient.occupation],
-                                    ['Status Pernikahan', ':', patient.marital],
-                                ]
-                            }
+        body = [
+            {
+                'columns': [
+                    {
+                        'layout': 'noBorders',
+                        'table': {
+                            'body': [
+                                ['Nomer Pasien', ':', patient.patient_number],
+                                ['Nama', ':', patient.name],
+                                ['Alamat', ':', patient.address],
+                                ['Gender', ':', patient.gender],
+                                ['Tempat dan Tanggal Lahir', ':', f'{patient.place_birth}, {patient.date_birth}'],
+                            ]
                         }
-                    ],
-                },
-                '\n',
-                *diagnosis
-            ]
-        }
+                    },
+                    {
+                        'layout': 'noBorders',
+                        'table': {
+                            'body': [
+                                ['Telepon', ':', patient.phone],
+                                ['Golongan Darah', ':', patient.blood],
+                                ['Pekerjaan', ':', patient.occupation],
+                                ['Status Pernikahan', ':', patient.marital],
+                            ]
+                        }
+                    }
+                ],
+            },
+            '\n',
+            *diagnosis
+        ]
 
-        return Response(data)
+        template = pdf_template([body], title='Laporan Rekam Medis', orientation='landscape')
+
+        return Response(template)

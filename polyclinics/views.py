@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from polyclinics.models import Poly
 from polyclinics.serializers import PolySerializer
+from utils.views import pdf_template
 
 
 class PolyViewSet(viewsets.ModelViewSet):
@@ -41,38 +42,25 @@ class PolyViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def report(self, request):
         queryset = self.filter_queryset(self.get_queryset())
-        print(queryset)
         polys = queryset.values_list(
             'poly_number',
             'name',
         )
-
-        data = {
-            'content': [
-                {
-                    'text': 'LAPORAN POLI',
-                    'fontSize': 20,
-                    'margin': [0, 15]
-                },
-                {
-                    'text': f'Tanggal: {datetime.now().strftime("%d-%m-%Y")}',
-                    'margin': [0, 15]
-                },
-                {
-                    'table': {
-                        'body': [
-                            [
-                                'Nomer Poli',
-                                'Nama',
-                            ],
-                            *polys
-                        ]
-                    }
-                }
-            ]
+        body = {
+            'table': {
+                'widths': ['*', '*'],
+                'body': [
+                    [
+                        {'text': 'Nomer Poli', 'style': 'tableHeader'},
+                        {'text': 'Nama', 'style': 'tableHeader'},
+                    ],
+                    *polys
+                ]
+            }
         }
+        template = pdf_template([body], 'Laporan Poli', orientation='landscape')
 
-        return Response(data)
+        return Response(template)
 
 
 

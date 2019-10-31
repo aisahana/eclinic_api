@@ -8,6 +8,7 @@ from rest_framework.response import Response
 
 from payments.models import Payment
 from payments.serializers import PaymentSerializer
+from utils.views import pdf_template
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -81,58 +82,24 @@ class PaymentViewSet(viewsets.ModelViewSet):
             F('amount'),
         )
 
-        data = {
-            'styles': {
-                'header': {
-                    'fontSize': 22,
-                    'bold': True
-                },
-                'anotherStyle': {
-                    'italics': True,
-                    'fontSize': 25,
-                    'color': 'blue',
-                    'bold': True,
-                    'alignment': 'left'
+        body = [
+            {
+                'table': {
+                    'body': [
+                        [
+                            'Nomer Pembayaran',
+                            'Tanggal',
+                            'Pasien',
+                            'Dokter',
+                            'Poli',
+                            'Biaya'
+                        ],
+                        *payments
+                    ]
                 }
             },
-            'pageOrientation': 'landscape',
-            'watermark': {
-                'text': 'eClinic - Aisahana',
-                'color': 'blue',
-                'opacity': 0.3,
-                'bold': True,
-                'italics': False,
-                'fontSize': 60
-            },
-            'info': {
-                'title': 'Aisahana Reporting',
-                'author': 'Aisahana',
-                'subject': 'Laporan Dokter',
-            },
-            'content': [
-                {
-                    'text': 'LAPORAN PEMBAYARAN',
-                    'fontSize': 20,
-                    'margin': [0, 15]
-                },
-                {
-                    'table': {
-                        'body': [
-                            [
-                                'Nomer Pembayaran',
-                                'Tanggal',
-                                'Pasien',
-                                'Dokter',
-                                'Poli',
-                                'Biaya'
-                            ],
-                            *payments
-                        ]
-                    }
-                },
-                '\n',
-                {'text': f'Total Rp. {total["total"]}', 'style': 'anotherStyle'}
-            ]
-        }
-
-        return Response(data)
+            '\n',
+            {'text': f'Total Rp. {total["total"]}', 'style': 'anotherStyle'}
+        ]
+        template = pdf_template([body], 'Laporan Pembayaran', orientation='landscape')
+        return Response(template)

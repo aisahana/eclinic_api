@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from orders.models import Register
 from orders.serializers import RegisterSerializer, CheckPatientSerializer
+from utils.views import pdf_template
 
 
 class RegisterViewSet(viewsets.ModelViewSet):
@@ -106,42 +107,22 @@ class RegisterViewSet(viewsets.ModelViewSet):
             'complain',
         )
 
-        data = {
-            'watermark': {
-                'text': 'eClinic - Aisahana',
-                'color': 'blue',
-                'opacity': 0.3,
-                'bold': True,
-                'italics': False,
-                'fontSize': 60
-            },
-            'info': {
-                'title': 'Aisahana Reporting',
-                'author': 'Aisahana',
-                'subject': 'Laporan Dokter',
-            },
-            'content': [
-                {
-                    'text': 'LAPORAN REGISTRASI',
-                    'fontSize': 20,
-                    'margin': [0, 15]
-                },
-                {
-                    'table': {
-                        'body': [
-                            [
-                                'Nomer Registrasi',
-                                'Tanggal',
-                                'Pasien',
-                                'Dokter',
-                                'Poli',
-                                'Keluhan'
-                            ],
-                            *registers
-                        ]
-                    }
-                }
-            ]
+        body = {
+            'table': {
+                'body': [
+                    [
+                        'Nomer Registrasi',
+                        'Tanggal',
+                        'Pasien',
+                        'Dokter',
+                        'Poli',
+                        'Keluhan'
+                    ],
+                    *registers
+                ]
+            }
         }
 
-        return Response(data)
+        template = pdf_template([body], 'Laporan Registrasi Pasien', orientation='landscape')
+
+        return Response(template)

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from payments.models import Payment
+from utils.views import pdf_template
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -40,32 +41,25 @@ class PaymentSerializer(serializers.ModelSerializer):
                 if obj.recipe.register.poly:
                     poly = ['Poli', ':', obj.recipe.register.poly.name]
 
-        data = {
-            'content': [
-                {
-                    'text': 'FAKTUR PEMBAYARAN',
-                    'fontSize': 20,
-                    'margin': [0, 15]
-                },
-                {
-                    'layout': 'noBorders',
-                    'table': {
-                        'body': [
-                            ['Nomer Pembayaran', ':', obj.payment_number],
-                            ['Tanggal', ':', obj.created.strftime('%d-%m-%Y')],
-                            patient,
-                            doctor,
-                            poly,
-                            ['Biaya', ':', obj.amount],
-                            ['Dibayar', ':', obj.pay],
-                            ['Kembali', ':', obj.change],
-                        ]
-                    }
-                }
-            ]
+        body = {
+            'layout': 'noBorders',
+            'table': {
+                'body': [
+                    ['Nomer Pembayaran', ':', obj.payment_number],
+                    ['Tanggal', ':', obj.created.strftime('%d-%m-%Y')],
+                    patient,
+                    doctor,
+                    poly,
+                    ['Biaya', ':', obj.amount],
+                    ['Dibayar', ':', obj.pay],
+                    ['Kembali', ':', obj.change],
+                ]
+            }
         }
 
-        return dict(data)
+        template = pdf_template([body], 'Faktur Pembayaran', orientation='landscape')
+
+        return template
 
     class Meta:
         model = Payment

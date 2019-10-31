@@ -1,5 +1,6 @@
 import datetime as dtn
 from django.db.models import Sum, F
+from django.db.models.functions import Coalesce
 from rest_framework import viewsets, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
@@ -10,6 +11,7 @@ from rest_framework.response import Response
 from medicines.models import Medicine, Recipe, RecipeItem
 from medicines.serializers import MedicineSerializer, RecipeSerializer, RecipeItemSerializer, \
     MedicineCalculationSerializer, TotalUsedSerializer
+from utils.views import pdf_template
 
 
 class MedicineViewSet(viewsets.ModelViewSet):
@@ -41,8 +43,8 @@ class MedicineViewSet(viewsets.ModelViewSet):
         medicines = self.get_queryset()\
             .filter(is_draft=False)\
             .annotate(
-                total_used=Sum('recipeitem__quantity'),
-                total_amount=Sum('recipeitem__quantity') * F('price')
+                total_used=Coalesce(Sum('recipeitem__quantity'), 0),
+                total_amount=Coalesce(Sum('recipeitem__quantity') * F('price'), 0)
         ).order_by('-total_used')[:5]
 
         return Response(TotalUsedSerializer(medicines, many=True).data)
@@ -59,32 +61,25 @@ class MedicineViewSet(viewsets.ModelViewSet):
             'price',
         )
 
-        data = {
-            'content': [
-                {
-                    'text': 'LAPORAN OBAT',
-                    'fontSize': 20,
-                    'margin': [0, 15]
-                },
-                {
-                    'table': {
-                        'body': [
-                            [
-                                'Nomer Obat',
-                                'Nama',
-                                'Satuan',
-                                'Jenis',
-                                'Stok',
-                                'Tarif'
-                            ],
-                            *medicines
-                        ]
-                    }
-                }
-            ]
+        body = {
+            'table': {
+                'body': [
+                    [
+                        {'text': 'Nomer Obat', 'style': 'tableHeader'},
+                        {'text': 'Nama', 'style': 'tableHeader'},
+                        {'text': 'Satuan', 'style': 'tableHeader'},
+                        {'text': 'Jenis', 'style': 'tableHeader'},
+                        {'text': 'Stok', 'style': 'tableHeader'},
+                        {'text': 'Tarif', 'style': 'tableHeader'},
+                    ],
+                    *medicines
+                ]
+            }
         }
 
-        return Response(data)
+        template = pdf_template([body], 'Laporan Obat')
+
+        return Response(template)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
