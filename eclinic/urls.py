@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
+from counters.views import CounterViewSet, QueueViewSet
 from medicines.views import MedicineViewSet, RecipeViewSet, RecipeItemViewSet
 from orders.views import RegisterViewSet
 from payments.views import PaymentViewSet
@@ -23,5 +24,7 @@ router.register(r'registers', RegisterViewSet, basename='register')
 router.register(r'recipes', RecipeViewSet, basename='recipe')
 router.register(r'recipe-items', RecipeItemViewSet, basename='recipe-item')
 router.register(r'payments', PaymentViewSet, basename='payment')
+router.register(r'counters', CounterViewSet, basename='counter')
+router.register(r'queues', QueueViewSet, basename='queue')
 
 urlpatterns += router.urls

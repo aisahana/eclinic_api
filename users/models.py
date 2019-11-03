@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -8,6 +10,7 @@ from rest_framework.authtoken.models import Token
 
 from polyclinics.models import Poly
 from utils.models import Timestamp, auto_number
+from utils.views import calculate_age
 
 
 class Doctor(Timestamp):
@@ -117,10 +120,9 @@ class Patient(Timestamp):
             self.place_birth = 'Jakarta'
 
         if not self.date_birth:
-            self.date_birth = '2019-01-29'
+            self.date_birth = date(1992, 11, 3)
 
-        if not self.age:
-            self.age = 30
+        self.age = int(calculate_age(self.date_birth))
 
         if not self.phone:
             self.phone = '0859999999999'

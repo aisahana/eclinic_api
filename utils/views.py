@@ -1,4 +1,7 @@
-from datetime import datetime
+from datetime import datetime, date
+
+from counters.models import Queue
+
 
 def pdf_template(body, title, orientation='potrait', subject='Laporan'):
     return {
@@ -43,3 +46,37 @@ def pdf_template(body, title, orientation='potrait', subject='Laporan'):
             }
         },
     }
+
+
+def calculate_age(born):
+    print(type(born))
+    if not born:
+        return 0
+    today = date.today()
+    try:
+        birthday = born.replace(year=today.year)
+    except ValueError:
+        birthday = born.replace(year=today.year,
+                                month=born.month + 1, day=1)
+
+    if birthday > today:
+        return today.year - born.year - 1
+    else:
+        return today.year - born.year
+
+
+def generate_queue(counter, que):
+    q = Queue.objects.filter(
+        counter=counter,
+        codec_time=datetime.now().date(),
+        is_draft=False
+    ).exclude(pk=que.pk).count()
+
+    queue = que
+    queue.counter=counter
+    queue.codec_time=datetime.now().date()
+    queue.is_draft=False
+    queue.number=q+1
+    queue.save()
+
+    return queue

@@ -42,6 +42,7 @@ INSTALLED_APPS += [
     'medicines',
     'orders',
     'payments',
+    'counters',
 ]
 
 MIDDLEWARE = [
@@ -134,5 +135,6 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter'
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25
+    'PAGE_SIZE': 25,
+    'DATE_INPUT_FORMATS': ['iso-8601', '%Y-%m-%dT%H:%M:%S.%fZ']
 }
